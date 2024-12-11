@@ -13,6 +13,8 @@ let gfx;
 
 let frameTime;
 let a = 255;
+
+let pause = false;
 class Bitmap
 {
     constructor(width, height)
@@ -34,11 +36,13 @@ function init() {
     cvs.setAttribute("height", HEIGHT + "px");
     gfx = cvs.getContext("2d");
 
-    cvs.onfocus = function()
-    {
-        console.log(1);
-    }
-    cvs.focus();
+    cvs.addEventListener('mouseover', function() {
+      pause = false;
+    }, false);
+    cvs.addEventListener("mouseout", function () {
+        pause = true;
+    }, false);
+
     frameTime = document.getElementById("frame");
 
     WIDTH = WIDTH / SCALE;
@@ -55,10 +59,11 @@ function run(time) {
     let currentTime = new Date().getTime();
     passedTime += currentTime - previousTime;
     previousTime = currentTime;
-    while (passedTime >= msPerFrame)
-    {
-        update(passedTime);
-        render();
+    while (passedTime >= msPerFrame) {
+      if (!pause ){
+            update(passedTime);
+            render();
+        }
         passedTime -= msPerFrame;
     }
     requestAnimationFrame(run);
