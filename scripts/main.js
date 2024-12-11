@@ -21,8 +21,26 @@ let time = 0;
 let view;
 
 let FOV = 70;
-class Bitmap
-{
+
+function Random(seed) {
+    this._seed = seed % 2147483647;
+    if (this._seed <= 0) this._seed += 2147483646;
+}
+/**
+ * Returns a pseudo-random value between 1 and 2^32 - 2.
+ */
+Random.prototype.next = function () {
+    return this._seed = this._seed * 16807 % 2147483647;
+};
+/**
+ * Returns a pseudo-random floating point number in range [0, 1).
+ */
+Random.prototype.nextFloat = function (opt_minOrMax, opt_max) {
+    // We know that result of next() will be 1 to 2147483646 (inclusive).
+    return (this.next() - 1) / 2147483646;
+};
+
+class Bitmap {
     constructor(width, height) {
         this.width = width;
         this.height = height;
@@ -54,8 +72,7 @@ class Bitmap
 }
 
 class View extends Bitmap {
-  constructor(width, height)
-    {
+  constructor(width, height) {
         super(width, height);
         this.px = 0.0;
         this.py = 0.0;
@@ -63,19 +80,18 @@ class View extends Bitmap {
         this.rotX = 0.0;
         this.rotY = 0.0;
     }
-    renderPerspective()
-    {
+    renderPerspective() {
         this.rotX = Math.cos(time) * 30;
         this.rotY = Math.sin(time) * 30;
 
-        for (let i = 0; i < 1000; i++)
-        {
-            this.renderPoint(Math.random() * 1 - 0.5, Math.random() * 1 - 0.5, 1);
+        let r = new Random(123);
+
+        for (let i = 0; i < 1000; i++) {
+          this.renderPoint(r.nextFloat() * 1 - 0.5, r.nextFloat() * 1 - 0.5, 1);
         }
         // this.renderPoint(10, 10, 2);
     }
-    renderPoint(ox, oy, oz)
-    {
+    renderPoint(ox, oy, oz) {
         let sinX = Math.sin(this.rotX * Math.PI / 180.0);
         let cosX = Math.cos(this.rotX * Math.PI / 180.0);
         let sinY = Math.sin(this.rotY * Math.PI / 180.0);
