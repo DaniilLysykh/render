@@ -43,13 +43,18 @@ Random.prototype.nextFloat = function (opt_minOrMax, opt_max) {
     return (this.next() - 1) / 2147483646;
 };
 
-class Vertex
-{
-    constructor(x, y, z)
-    {
+class Vertex {
+    constructor(x, y, z) {
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+}
+
+class Pixel {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
     }
 }
 
@@ -140,25 +145,24 @@ class View extends Bitmap {
         let r = new Random(123);
 
         for (let i = 0; i < 1000; i++) {
-          this.renderPoint(r.nextFloat() * 1 - 0.5, r.nextFloat() * 1 - 0.5, -2, r.nextFloat() * 0xffffff);
+            this.drawPoint(new Vertex(r.nextFloat() * 1 - 0.5, r.nextFloat() * 1 - 0.5, -2), r.nextFloat() * 0xffffff);
         }
-        // this.renderPoint(10, 10, 2);
-        this.renderPoint(3, 0, 3, 0x000000);
-        this.renderPoint(-3, 0, 3, 0xff0000);
-        this.renderPoint(3, 0, -3, 0x00ff00);
-        this.renderPoint(-3, 0, -3, 0x0000ff);
+        this.drawPoint(new Vertex(3, 0, -3), 0x00ff00);
+        this.drawPoint(new Vertex(-3, 0, -3), 0x0000ff)
+
+        this.drawLine(new Vertex(-2, 0, -2), new Vertex(2, 1, -2));
     }
-    renderPoint(x, y, z, color) {
+    drawPoint(p, color) {
         if (color == undefined) color = 0xff00ff;
-        let p = this.playerTransform(new Vertex(x, y, z));
-        let sp = this.convertIntoScreenSpace(p);
-        if (sp != undefined)
-            this.renderPixel(sp, color);
+        let vp = this.playerTransform(p);
+        let sp = this.convertIntoScreenSpace(vp);
+        
+        if (sp != undefined) this.renderPixel(sp, color);;
       }    
-      drawLine(x0, y0, z0, x1, y1, z1, color) {
+      drawLine(p0, p1, color) {
         if (color == undefined) color = 0xff00ff;
-        p0 = this.playerTransform(x0, y0, z0);
-        p1 = this.playerTransform(x1, y1, z1);
+        let vp0 = this.playerTransform(p0);
+        let vp1 = this.playerTransform(p1);
     }
     playerTransform(p) {
       let ox = p.x - player.x;
@@ -176,9 +180,9 @@ class View extends Bitmap {
         let sx = Math.floor((p.x * FOV / p.z + WIDTH / 2.0));
         let sy = Math.floor((p.y * FOV / p.z + HEIGHT / 2.0));
         if (sx < 0 || sx >= this.width || sy < 0 || sy >= this.height)
-          return undefined;
+            return undefined;
         else
-          return { x: sx, y: sy };
+            return newPixel(sx, sy);
     }
     renderPixel(p, color) {
         this.pixels[p.x + p.y * this.width] = color;
